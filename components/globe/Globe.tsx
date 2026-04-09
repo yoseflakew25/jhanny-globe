@@ -267,7 +267,16 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
         (e: any) => {
             e.stopPropagation();
             const name = findCountryAtPoint(e.point);
-            onCountryClick(selectedCountry === name ? null : name);
+            if (!name) return;
+
+            // Only allow clicking if the country is in the visited list
+            const isVisited = JAHNNY_VISITED_COUNTRIES.some(v =>
+                name.toLowerCase() === v.toLowerCase()
+            );
+
+            if (isVisited) {
+                onCountryClick(selectedCountry === name ? null : name);
+            }
         },
         [findCountryAtPoint, onCountryClick, selectedCountry]
     );
