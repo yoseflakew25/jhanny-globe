@@ -1,8 +1,9 @@
 # 🌍 Jahnny Globe: The Ultimate Travel Archive
 
-| ![Globe View 1](public/Screenshot 2026-04-10 091753.png) | ![Globe View 2](public/Screenshot 2026-04-10 091805.png) | ![Globe View 3](public/Screenshot 2026-04-10 091819.png) |
+| ![Globe View 1](public/globe-1.png) | ![Globe View 2](public/globe-2.png) | ![Globe View 3](public/globe-3.png) |
 | :---: | :---: | :---: |
 | *Immersive 3D Experience* | *Cyberpunk Terminal UI* | *Vlog Archive Integration* |
+
 
 A premium, interactive 3D globe visualization developed as a passion project for my favorite YouTuber and vlogger, **@jahnnyVLOGS**. This application archives and showcases Jahnny's global travels, combining high-performance 3D rendering with a sleek cyberpunk aesthetic to provide an immersive journey through captured memories across the world.
 
