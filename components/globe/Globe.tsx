@@ -66,23 +66,24 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
     // - All Borders (Muted White)
     // - Visited Fill (Jahnny's Trail - Solid Green)
     const worldLayers = useMemo(() => {
-        if (!geoData) return { borders: null, visitedBorders: null, visitedTexture: null };
+        if (!geoData) return { borders: null, visitedBorders: null, ethiopiaBorders: null, visitedTexture: null };
 
         // 1. Create a 4K Canvas for perfect concave landmass fills
         const canvas = document.createElement("canvas");
         canvas.width = 2048;
         canvas.height = 1024;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return { borders: null, visitedBorders: null, visitedTexture: null };
+        if (!ctx) return { borders: null, visitedBorders: null, ethiopiaBorders: null, visitedTexture: null };
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#00ff00"; // Vibrant Neon Green
 
         const borderPoints: THREE.Vector3[] = [];
         const visitedBorderPoints: THREE.Vector3[] = [];
+        const ethiopiaBorderPoints: THREE.Vector3[] = [];
 
         geoData.features.forEach((feature) => {
             const name = feature.properties.name || feature.properties.admin || "";
+            const isEthiopia = name.toLowerCase() === "ethiopia";
             const isVisited = JAHNNY_VISITED_COUNTRIES.some(v =>
                 name.toLowerCase() === v.toLowerCase() ||
                 (feature.properties.formal_en && feature.properties.formal_en.toLowerCase() === v.toLowerCase())
@@ -95,7 +96,10 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
                 polygons = feature.geometry.coordinates as number[][][][];
             }
 
-            if (isVisited) ctx.beginPath();
+            if (isVisited) {
+                ctx.beginPath();
+                ctx.fillStyle = isEthiopia ? "#0066ff" : "#00ff00"; // Blue for Ethiopia, Neon Green for others
+            }
 
             polygons.forEach((polygon) => {
                 polygon.forEach((ring) => {
@@ -117,7 +121,10 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
                         const p = convertToSphere(ring[i][0], ring[i][1], GLOBE_RADIUS + 0.002);
                         const nextP = convertToSphere(ring[i + 1][0], ring[i + 1][1], GLOBE_RADIUS + 0.002);
                         borderPoints.push(p, nextP);
-                        if (isVisited) visitedBorderPoints.push(p, nextP);
+                        if (isVisited) {
+                            if (isEthiopia) ethiopiaBorderPoints.push(p, nextP);
+                            else visitedBorderPoints.push(p, nextP);
+                        }
                     }
                 });
             });
@@ -127,15 +134,21 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
 
         const borders = new THREE.BufferGeometry().setFromPoints(borderPoints);
         const visitedBorders = new THREE.BufferGeometry().setFromPoints(visitedBorderPoints);
+        const ethiopiaBorders = new THREE.BufferGeometry().setFromPoints(ethiopiaBorderPoints);
 
         const visitedTexture = new THREE.CanvasTexture(canvas);
         visitedTexture.anisotropy = 4;
         visitedTexture.colorSpace = THREE.SRGBColorSpace;
 
-        return { borders, visitedBorders, visitedTexture };
+        return { borders, visitedBorders, ethiopiaBorders, visitedTexture };
     }, [geoData, convertToSphere]);
 
-    const { borders: worldBordersGeometry, visitedBorders: visitedBordersGeometry, visitedTexture } = worldLayers;
+    const {
+        borders: worldBordersGeometry,
+        visitedBorders: visitedBordersGeometry,
+        ethiopiaBorders: ethiopiaBordersGeometry,
+        visitedTexture
+    } = worldLayers;
 
     // 2. Optimized Geometry Generator for Selection/Hover
     const getCountryGeometries = useCallback(
@@ -269,12 +282,13 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
             const name = findCountryAtPoint(e.point);
             if (!name) return;
 
-            // Only allow clicking if the country is in the visited list
+            // Only allow clicking if the country is in the visited list 
+            // AND it's not Ethiopia (user request: Ethiopia unclickable)
             const isVisited = JAHNNY_VISITED_COUNTRIES.some(v =>
                 name.toLowerCase() === v.toLowerCase()
             );
 
-            if (isVisited) {
+            if (isVisited && name.toLowerCase() !== "ethiopia") {
                 onCountryClick(selectedCountry === name ? null : name);
             }
         },
@@ -286,6 +300,7 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
         return () => {
             worldBordersGeometry?.dispose();
             visitedBordersGeometry?.dispose();
+            ethiopiaBordersGeometry?.dispose();
             visitedTexture?.dispose();
             selectionData?.lineGeom.dispose();
             selectionData?.fillGeom.dispose();
@@ -345,14 +360,38 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
                 </group>
             )}
 
+            {/* 2b. ETHIOPIA - Special Blue Trail */}
+            {ethiopiaBordersGeometry && (
+                <group>
+                    <lineSegments geometry={ethiopiaBordersGeometry}>
+                        <lineBasicMaterial color="#0066ff" transparent={false} />
+                    </lineSegments>
+                    <lineSegments geometry={ethiopiaBordersGeometry} scale={[1.001, 1.001, 1.001]}>
+                        <lineBasicMaterial color="#0066ff" transparent opacity={0.6} depthWrite={false} />
+                    </lineSegments>
+                    <lineSegments geometry={ethiopiaBordersGeometry} scale={[1.003, 1.003, 1.003]}>
+                        <lineBasicMaterial color="#0066ff" transparent opacity={0.2} depthWrite={false} />
+                    </lineSegments>
+                </group>
+            )}
+
             {/* 3. Hover Highlight (Green) */}
             {hoverData && (
                 <group>
                     <lineSegments geometry={hoverData.lineGeom}>
-                        <lineBasicMaterial color="#00ff00" transparent opacity={0.8} />
+                        <lineBasicMaterial
+                            color={hoveredCountry?.toLowerCase() === "ethiopia" ? "#0066ff" : "#00ff00"}
+                            transparent
+                            opacity={0.8}
+                        />
                     </lineSegments>
                     <mesh geometry={hoverData.fillGeom}>
-                        <meshBasicMaterial color="#00ff00" transparent opacity={0.15} side={THREE.DoubleSide} />
+                        <meshBasicMaterial
+                            color={hoveredCountry?.toLowerCase() === "ethiopia" ? "#0066ff" : "#00ff00"}
+                            transparent
+                            opacity={0.15}
+                            side={THREE.DoubleSide}
+                        />
                     </mesh>
                 </group>
             )}
@@ -361,10 +400,18 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
             {selectionData && (
                 <group>
                     <lineSegments geometry={selectionData.lineGeom}>
-                        <lineBasicMaterial color="#00ff00" linewidth={2} />
+                        <lineBasicMaterial
+                            color={selectedCountry?.toLowerCase() === "ethiopia" ? "#0066ff" : "#00ff00"}
+                            linewidth={2}
+                        />
                     </lineSegments>
                     <mesh geometry={selectionData.fillGeom}>
-                        <meshBasicMaterial color="#00ff00" transparent opacity={0.2} side={THREE.DoubleSide} />
+                        <meshBasicMaterial
+                            color={selectedCountry?.toLowerCase() === "ethiopia" ? "#0066ff" : "#00ff00"}
+                            transparent
+                            opacity={0.2}
+                            side={THREE.DoubleSide}
+                        />
                     </mesh>
                 </group>
             )}
