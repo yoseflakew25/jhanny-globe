@@ -1,6 +1,6 @@
 # 🌍 Jahnny Globe: The Ultimate Travel Archive
 
-![Jahnny Globe Preview](public/screenshot.png)
+<video src="public/globe-preview.mp4" width="100%" controls autoplay loop muted></video>
 
 A premium, interactive 3D globe visualization developed as a passion project for my favorite YouTuber and vlogger, **@jahnnyVLOGS**. This application archives and showcases Jahnny's global travels, combining high-performance 3D rendering with a sleek cyberpunk aesthetic to provide an immersive journey through captured memories across the world.
 
