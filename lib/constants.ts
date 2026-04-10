@@ -33,7 +33,7 @@ export type Vlog = {
 
 // Map and filter the JSON data to exclude empty entries
 export const JAHNNY_VLOGS: Record<string, Vlog[]> = Object.entries(vlogsData).reduce((acc, [country, vlogs]) => {
-    const validVlogs = (vlogs as any[]).filter(vlog => vlog.title && vlog.youtubeLink);
+    const validVlogs = (vlogs as Vlog[]).filter(vlog => vlog.title && vlog.youtubeLink);
     if (validVlogs.length > 0) {
         acc[country] = validVlogs as Vlog[];
     }

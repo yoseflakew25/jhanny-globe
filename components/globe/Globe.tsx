@@ -1,7 +1,8 @@
 "use client";
 
 import * as THREE from "three";
-import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { ThreeEvent } from "@react-three/fiber";
 import { GeoJSONWorldData } from "@/types/geoJson";
 import { isPointInPolygon, isPointInMultiPolygon } from "@/lib/geo-utils";
 import { JAHNNY_VISITED_COUNTRIES } from "@/lib/constants";
@@ -245,11 +246,11 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
                 const bounds = featureBounds[i];
                 if (lon < bounds.minX || lon > bounds.maxX || lat < bounds.minY || lat > bounds.maxY) continue;
                 const feature = geoData.features[i];
-                const coords = feature.geometry.coordinates as any;
+                const coords = feature.geometry.coordinates as number[][][] | number[][][][];
                 if (
                     feature.geometry.type === "Polygon"
-                        ? isPointInPolygon([lon, lat], coords)
-                        : isPointInMultiPolygon([lon, lat], coords)
+                        ? isPointInPolygon([lon, lat], coords as number[][][])
+                        : isPointInMultiPolygon([lon, lat], coords as number[][][][])
                 ) {
                     return feature.properties.name || feature.properties.admin;
                 }
@@ -260,7 +261,7 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
     );
 
     const handlePointerMove = useCallback(
-        (e: any) => {
+        (e: ThreeEvent<PointerEvent>) => {
             e.stopPropagation();
             const name = findCountryAtPoint(e.point);
             if (name !== hoveredCountry) {
@@ -277,7 +278,7 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
     }, [onCountryHover]);
 
     const handleGlobeClick = useCallback(
-        (e: any) => {
+        (e: ThreeEvent<PointerEvent>) => {
             e.stopPropagation();
             const name = findCountryAtPoint(e.point);
             if (!name) return;
@@ -307,7 +308,7 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
             hoverData?.lineGeom.dispose();
             hoverData?.fillGeom.dispose();
         };
-    }, [worldBordersGeometry, visitedBordersGeometry, visitedTexture, selectionData, hoverData]);
+    }, [worldBordersGeometry, visitedBordersGeometry, ethiopiaBordersGeometry, visitedTexture, selectionData, hoverData]);
 
     return (
         <group>
