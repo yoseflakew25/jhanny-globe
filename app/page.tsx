@@ -3,10 +3,12 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useEffect, useState, Suspense, memo } from "react";
-import Globe from "@/components/globe/Globe";
+import dynamic from "next/dynamic";
 import CountryNameDisplay from "@/components/globe/CountryNameDisplay";
-import VlogDrawer from "@/components/globe/VlogDrawer";
 import { JAHNNY_VLOGS } from "@/lib/constants";
+
+const Globe = dynamic(() => import("@/components/globe/Globe"), { ssr: false });
+const VlogDrawer = dynamic(() => import("@/components/globe/VlogDrawer"), { ssr: false });
 
 function LoadingScreen() {
   return (

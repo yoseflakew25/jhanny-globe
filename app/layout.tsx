@@ -16,20 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  ),
   title: "Jhanny Globe | Interactive 3D World Visualization",
   description:
     "This 3d globe visualisation shows countries that Jahny have visited and the ones I plan to visit.",
   openGraph: {
     title: "Jhanny Globe | Interactive 3D World Visualization",
     description:
-    "This 3d globe visualisation shows countries that Jahny have visited and the ones I plan to visit.",
+      "This 3d globe visualisation shows countries that Jahny have visited and the ones I plan to visit.",
     images: ["/screenshot.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Jhanny Globe | Interactive 3D World Visualization",
     description:
-    "This 3d globe visualisation shows countries that Jahny have visited and the ones I plan to visit.",
+      "This 3d globe visualisation shows countries that Jahny have visited and the ones I plan to visit.",
     images: ["/screenshot.png"],
   },
 };
@@ -40,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
           "antialiased",

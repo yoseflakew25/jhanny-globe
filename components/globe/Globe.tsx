@@ -73,7 +73,7 @@ export default function Globe({ onCountryClick, onCountryHover, selectedCountry 
         const canvas = document.createElement("canvas");
         canvas.width = 2048;
         canvas.height = 1024;
-        const ctx = canvas.getContext("2d");
+        const ctx = typeof document !== "undefined" ? canvas.getContext("2d") : null;
         if (!ctx) return { borders: null, visitedBorders: null, ethiopiaBorders: null, visitedTexture: null };
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);

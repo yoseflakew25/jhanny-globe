@@ -47,7 +47,7 @@ export const normalizeCountryName = (name: string): string => {
         "United States": "United States of America",
         "UK": "United Kingdom",
         "UAE": "United Arab Emirates",
-        "Swittzerland": "Switzerland", // Handle typo in user input
+        "Switzerland": "Switzerland", // Corrected typo
     };
     return mapping[name] || name;
 };
